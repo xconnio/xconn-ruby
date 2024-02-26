@@ -1,0 +1,10 @@
+module Wamp
+  module Serializer
+    # Add common API for serializer
+    class JSON
+      def self.encode: (String message) -> Array[Integer]
+
+      def self.decode: (Array[Integer] message) -> String
+    end
+  end
+end
