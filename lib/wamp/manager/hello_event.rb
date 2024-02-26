@@ -25,7 +25,7 @@ module Wamp
 
       def self.demodulize(path)
         path = path.to_s
-        if i = path.rindex("::")
+        if i = path.rindex("::") # rubocop:disable Lint/AssignmentInCondition
           path[(i + 2), path.length]
         else
           path
@@ -52,6 +52,7 @@ module Wamp
       end
     end
 
+    # Welcome Event
     class WelcomeEvent < Base
       def emit_event_name
         :join
@@ -62,6 +63,7 @@ module Wamp
       end
     end
 
+    # Abort Event
     class AbortEvent < Base
       def emit_event_name
         :close
@@ -76,6 +78,7 @@ module Wamp
     class GoodbyeEvent < AbortEvent
     end
 
+    # Error Event
     class ErrorEvent < Base
       def emit_event_name
         "request_#{request_id}"
@@ -86,6 +89,7 @@ module Wamp
       end
     end
 
+    # Subscribe Event
     class SubscribeEvent < Base
       def emit_event_name
         raise RuntimeError
@@ -106,6 +110,7 @@ module Wamp
       end
     end
 
+    # Subscribe Event
     class SubscribedEvent < Base
       def emit_event_name
         "request_#{request_id}"
@@ -124,6 +129,7 @@ module Wamp
       end
     end
 
+    # Event Event
     class EventEvent < Base
       def emit_event_name
         "event_#{subscription_id}"
@@ -138,6 +144,7 @@ module Wamp
       end
     end
 
+    # Publish Event
     class PublishEvent < Base
       def emit_event_name
         raise NotImplementedError
@@ -158,6 +165,7 @@ module Wamp
       end
     end
 
+    # Published Event
     class PublishedEvent < Base
       def emit_event_name
         "request_#{request_id}"
