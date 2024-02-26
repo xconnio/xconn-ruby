@@ -1,4 +1,11 @@
 module Wamp
   VERSION: String
   # See the writing guide of rbs: https://github.com/ruby/rbs#guides
+
+  class Hello
+    attr_reader realm: String
+    attr_reader details: Hash[String, String]
+
+    def initialize: (realm: String, details: Hash) -> void
+  end
 end
