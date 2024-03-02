@@ -86,7 +86,7 @@ module Wamp
       Type::INVOCATION => Invocation
     }.freeze
 
-    def self.instance_from(wamp_message)
+    def self.resolve(wamp_message)
       type, = Validate.array!("Wamp Message", wamp_message)
       HANDLER[type].parse(wamp_message)
     end

@@ -40,6 +40,14 @@ module Wamp
 
           raise ArgumentError, "The response message length is #{array.length} but it should be #{expected_length} "
         end
+
+        def options!(options, valid_keys)
+          options.each_key do |key|
+            raise ArgumentError, "Unrecognized option: #{key.inspect}" unless valid_keys.include?(key)
+          end
+
+          options
+        end
       end
     end
   end
