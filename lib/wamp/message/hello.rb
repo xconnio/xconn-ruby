@@ -9,17 +9,29 @@ module Wamp
     class Hello
       def initialize(realm, details = {})
         @realm = Validate.string!("Realm", realm)
-        @details = default_details.merge(Validate.hash!("Details", details)).merge(additional_details)
+        @details = default_details.merge(parse_details(Validate.hash!("Details", details))).merge(additional_details)
       end
 
       def payload
         [Type::HELLO, @realm, @details]
       end
 
+      def parse_details(hsh = {})
+        details = {}
+        details[:roles] = hsh.fetch(:roles, default_roles)
+        details[:authid] = hsh.fetch(:authid, "")
+        details[:authmethods] = [*hsh.fetch(:authmethods, "anonymous")]
+        details
+      end
+
       private
 
       def default_details
-        { authid: "", roles: { caller: {}, publisher: {}, subscriber: {}, callee: {} } }
+        { roles: default_roles }
+      end
+
+      def default_roles
+        { caller: {}, publisher: {}, subscriber: {}, callee: {} }
       end
 
       def additional_details

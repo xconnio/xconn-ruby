@@ -3,6 +3,7 @@
 require_relative "event/hello"
 require_relative "event/welcome"
 require_relative "event/abort"
+require_relative "event/challenge"
 require_relative "event/goodbye"
 
 require_relative "event/error"

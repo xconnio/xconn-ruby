@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "websocket_client"
+require_relative "../auth/anonymous"
 require_relative "../message/validate"
 
 module Wamp
@@ -16,7 +17,7 @@ module Wamp
         super()
         @url = url
         @realm = realm
-        @options = Message::Validate.options!(options, [:serializer])
+        @options = Message::Validate.options!(options, %i[serializer auth])
 
         @websocket = Wamp::Connection::WebsocketClient.new(self, protocols)
       end
@@ -46,6 +47,10 @@ module Wamp
 
       def close(code = 3000, reason = "Reason")
         websocket.close(code, reason)
+      end
+
+      def auth
+        @options.fetch(:auth, Auth::Anonymous.new)
       end
 
       private

@@ -11,7 +11,7 @@ module Wamp
       end
 
       def self.decode(message)
-        ::MessagePack.unpack(message).pack("c*")
+        ::MessagePack.unpack(message.pack("c*"))
       end
     end
   end
