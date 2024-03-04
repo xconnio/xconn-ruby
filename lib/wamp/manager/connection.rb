@@ -1,25 +1,24 @@
 # frozen_string_literal: true
 
-require "delegate"
-
 module Wamp
   module Manager
     # connection
     class Connection < Connection::Base
-      def initialize(**kwargs)
+      attr_reader :session
+
+      def initialize(*args)
         super
         @session = Session.new(self)
       end
 
       def on_message(data)
-        p [:on_message, data]
-        message = Message.instance_from(coder.decode(data))
+        message = Message.resolve(coder.decode(data))
         if message.instance_of? Message::Welcome
 
-          manager = Manager::Base.instance_from(message, @session)
-          manager.emit_event(message)
+          event_manager = Manager::Event.resolve(message, session)
+          event_manager.emit_event(message)
         else
-          @session.on_message(message)
+          session.on_message(message)
         end
       end
 
@@ -31,8 +30,8 @@ module Wamp
 
       def send_hello_message
         message = Message::Hello.new(@realm)
-        manager = Manager::HelloEvent.new(message, self)
-        manager.add_event_listener
+        manager = Manager::Event::Hello.new(message, self)
+        manager.add_event_listener # adds on :join event listener
       end
     end
   end

@@ -6,6 +6,8 @@ module Wamp
   module Message
     # abort message
     class Unsubscribe
+      attr_reader :request_id, :subscription_id
+
       def initialize(request_id, subscription_id)
         @request_id = Validate.int!("Request Id", request_id)
         @subscription_id = Validate.int!("Subscription Id", subscription_id)

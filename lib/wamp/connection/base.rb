@@ -1,21 +1,24 @@
 # frozen_string_literal: true
 
 require_relative "websocket_client"
+require_relative "../message/validate"
 
 module Wamp
   module Connection
     # class to start accepting connnections
     class Base
+      class UnsupportedSerializer < StandardError; end
+
       include WebSocket::Driver::EventEmitter
       attr_reader :websocket, :url
 
-      def initialize(transport:, realm: :realm1, options: {})
+      def initialize(url = "ws://localhost:8080/ws", realm = "realm1", options = {})
         super()
-        @url = transport
+        @url = url
         @realm = realm
-        @options = options
+        @options = Message::Validate.options!(options, [:serializer])
 
-        @websocket = Wamp::Connection::WebsocketClient.new(self, @options[:protocols])
+        @websocket = Wamp::Connection::WebsocketClient.new(self, protocols)
       end
 
       def run
@@ -47,6 +50,17 @@ module Wamp
 
       private
 
+      def serializer
+        @options.fetch(:serializer, :json).to_sym
+      end
+
+      def protocols
+        protocol = { json: "wamp.2.json", cbor: "wamp.2.cbor", msgpack: "wamp.2.msgpack" }[serializer]
+        raise UnsupportedSerializer unless protocol
+
+        [protocol]
+      end
+
       def encode(wamp_message)
         coder.encode wamp_message
       end
@@ -56,10 +70,10 @@ module Wamp
       end
 
       def coder
-        @coder ||= case websocket.protocol
-                   when "wamp.2.json" then Wamp::Serializer::JSON
-                   when "wamp.2.msgpack" then Wamp::Serializer::MessagePack
-                   when "wamp.2.cbor" then Wamp::Serializer::Cbor
+        @coder ||= case serializer
+                   when :json then Wamp::Serializer::JSON
+                   when :msgpack then Wamp::Serializer::MessagePack
+                   when :cbor then Wamp::Serializer::Cbor
                    else
                      raise "Unsupported protocol #{websocket.protocol}"
                    end
