@@ -13,6 +13,7 @@ module Wamp
 
       def on_message(data)
         message = Message.resolve(coder.decode(data))
+        p [:on_message, message]
         session.on_message(message)
       end
 

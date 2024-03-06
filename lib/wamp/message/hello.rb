@@ -21,6 +21,7 @@ module Wamp
         details[:roles] = hsh.fetch(:roles, default_roles)
         details[:authid] = hsh.fetch(:authid, "")
         details[:authmethods] = [*hsh.fetch(:authmethods, "anonymous")]
+        details[:authextra] = hsh.fetch(:authextra) if hsh[:authextra]
         details
       end
 
