@@ -13,13 +13,7 @@ module Wamp
 
       def on_message(data)
         message = Message.resolve(coder.decode(data))
-        if message.instance_of? Message::Welcome
-
-          event_manager = Manager::Event.resolve(message, session)
-          event_manager.emit_event(message)
-        else
-          session.on_message(message)
-        end
+        session.on_message(message)
       end
 
       def on_open
@@ -29,7 +23,7 @@ module Wamp
       private
 
       def send_hello_message
-        message = Message::Hello.new(@realm)
+        message = Message::Hello.new(@realm, auth.details)
         manager = Manager::Event::Hello.new(message, self)
         manager.add_event_listener # adds on :join event listener
       end

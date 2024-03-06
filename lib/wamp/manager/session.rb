@@ -8,6 +8,8 @@ module Wamp
     class Session
       extend Forwardable
 
+      attr_reader :connection
+
       def initialize(connection)
         @connection = connection
       end
@@ -66,7 +68,8 @@ module Wamp
         -> { request_id += 1 }
       end
 
-      def_delegators :@connection, :emit, :on, :close, :transmit, :my_listeners
+      def_delegators :@connection, :emit, :on, :close, :transmit, :my_listeners, :auth
+      def_delegator :auth, :authenticate
       def_delegator :@connection, :remove_all_listeners, :off
     end
   end
