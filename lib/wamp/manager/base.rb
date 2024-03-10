@@ -10,8 +10,9 @@ module Wamp
       include WebSocket::Driver::EventEmitter
       attr_reader :session
 
-      def initialize
-        super
+      def initialize(options = {})
+        super()
+        @options = options
         @session = Session.new(self)
       end
 
@@ -22,10 +23,18 @@ module Wamp
         manager.emit_event(message)
       end
 
+      def auth
+        @options.fetch(:auth, Auth::Anonymous.new)
+      end
+
       def run
         message = Message::Hello.new("realm1")
         manager = Manager::Event::Hello.new(message, session)
         manager.add_event_listener # adds on :join event listener
+      end
+
+      def authenticate(challenge)
+        auth.authenticate(challenge)
       end
     end
   end
