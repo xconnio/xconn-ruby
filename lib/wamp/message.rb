@@ -95,12 +95,19 @@ module Wamp
       Type::UNREGISTERED => Unregistered,
 
       Type::INTERRUPT => Interrupt,
-      Type::INVOCATION => Invocation
+      Type::INVOCATION => Invocation,
+
+      Type::YIELD => Yield
     }.freeze
 
     def self.resolve(wamp_message)
       type, = Validate.array!("Wamp Message", wamp_message)
-      HANDLER[type].parse(wamp_message)
+      begin
+        HANDLER[type].parse(wamp_message)
+      rescue StandardError => e
+        p wamp_message
+        raise e
+      end
     end
   end
 end

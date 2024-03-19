@@ -20,12 +20,20 @@ module Wamp
           session.emit(emit_event_name, message)
         end
 
+        def transmit
+          session.transmit(payload)
+        end
+
         def listen_event_name
           "request_#{request_id}"
         end
 
         def emit_event_name
           "request_#{request_id}"
+        end
+
+        def error?
+          false
         end
       end
     end

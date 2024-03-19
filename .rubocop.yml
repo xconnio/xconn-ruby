@@ -15,3 +15,15 @@ Layout/LineLength:
 
 Metrics/BlockLength:
   Enabled: false
+
+Layout/BeginEndAlignment:
+  EnforcedStyleAlignWith: start_of_line
+
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: start_of_line
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+Layout/CaseIndentation:
+  EnforcedStyle: end

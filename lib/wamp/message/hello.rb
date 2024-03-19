@@ -7,6 +7,8 @@ module Wamp
   module Message
     # Wamp Hello message
     class Hello
+      attr_reader :realm, :details
+
       def initialize(realm, details = {})
         @realm = Validate.string!("Realm", realm)
         @details = default_details.merge(parse_details(Validate.hash!("Details", details))).merge(additional_details)
@@ -25,6 +27,11 @@ module Wamp
         details
       end
 
+      def self.parse(wamp_message)
+        _type, realm, details = wamp_message
+        new(realm, details)
+      end
+
       private
 
       def default_details
@@ -32,7 +39,14 @@ module Wamp
       end
 
       def default_roles
-        { caller: {}, publisher: {}, subscriber: {}, callee: {} }
+        { caller: {
+          features: { call_canceling: true, caller_identification: true, progressive_call_results: true }
+        }, publisher: {}, subscriber: {},
+          callee: {
+
+            features: { call_canceling: true, progressive_call_results: true, registration_revocation: true,
+                        caller_identification: true }
+          } }
       end
 
       def additional_details

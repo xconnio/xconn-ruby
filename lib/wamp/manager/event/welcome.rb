@@ -11,7 +11,8 @@ module Wamp
           :join
         end
 
-        def emit_event(_welcome)
+        def emit_event(welcome)
+          session.session_id = welcome.session_id
           session.emit(emit_event_name, session)
         end
       end

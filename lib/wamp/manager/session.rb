@@ -8,10 +8,25 @@ module Wamp
     class Session
       extend Forwardable
 
-      attr_reader :connection
+      attr_reader :connection, :session_id
 
       def initialize(connection)
         @connection = connection
+      end
+
+      def session_id=(id)
+        if session_id
+          send_protocol_violation("Received WELCOME message after session was established")
+        else
+          @session_id = id
+        end
+      end
+
+      def send_protocol_violation(text, *args, **kwargs)
+        message = Message::Abort.new({ message: text }, "wamp.error.protocol_violation", *args, **kwargs)
+        manager = Manager::Event::Abort.new(message, self)
+        connection.transmit(message.payload)
+        manager.emit_event(message)
       end
 
       def subscribe(topic, handler, options = {}, &block)

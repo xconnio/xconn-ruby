@@ -38,13 +38,13 @@ module Wamp
 
       def create_signature(challenge)
         extra = challenge.extra
-        return handle_channel_binding(extra) if extra["channel_id"]
+        return handle_channel_binding(extra) if extra[:channel_id]
 
         handle_without_channel_binding(extra)
       end
 
       def handle_without_channel_binding(extra)
-        hex_challenge     = extra["challenge"]
+        hex_challenge     = extra[:challenge]
         binary_challenge  = hex_to_binary(hex_challenge)
         binary_signature  = key_pair.sign(binary_challenge)
         signature         = binary_to_hex(binary_signature)
@@ -53,8 +53,8 @@ module Wamp
       end
 
       def handle_channel_binding(extra)
-        channel_id              = hex_to_binary(extra["channel_id"])
-        challenge               = hex_to_binary(extra["challenge"])
+        channel_id              = hex_to_binary(extra[:channel_id])
+        challenge               = hex_to_binary(extra[:challenge])
         xored_challenge         = xored_strings(channel_id, challenge)
         binary_signed_challenge = key_pair.sign(xored_challenge)
         signature               = binary_to_hex(binary_signed_challenge)
