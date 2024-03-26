@@ -14,7 +14,15 @@ module Wamp
         def emit_event(message)
           session.emit(emit_event_name, nil, message)
 
-          raise message.error if message.error
+          begin
+            raise message.error if message.error
+          rescue StandardError => e
+            puts "Error: #{e.message}"
+          end
+        end
+
+        def error?
+          true
         end
       end
     end

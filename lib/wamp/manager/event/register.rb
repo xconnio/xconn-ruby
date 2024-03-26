@@ -19,6 +19,11 @@ module Wamp
             end
           end
         end
+
+        def emit_event(message)
+          msg = Wamp::Router::Registrations.register(message, session)
+          session.transmit(msg.payload)
+        end
       end
     end
   end

@@ -103,7 +103,7 @@ RSpec.describe Wamp::Manager::Event::Register do
         session.register(register_message.procedure, handler, {})
 
         expect(session).to receive(:emit).with(error_event.listen_event_name, nil, Wamp::Message::Error)
-        expect { session.on_message(error_message) }.to raise_error(RuntimeError)
+        expect { session.on_message(error_message) }.to output("Error: wamp.error.procedure_already_exists\n").to_stdout
       end
     end
 
@@ -122,7 +122,7 @@ RSpec.describe Wamp::Manager::Event::Register do
 
         expect(session).to receive(:emit).with(call_event.listen_event_name, nil,
                                                Wamp::Message::Error).and_call_original
-        expect { session.on_message(error_message) }.to raise_error(RuntimeError)
+        expect { session.on_message(error_message) }.to output("Error: wamp.error.no_such_procedure\n").to_stdout
       end
     end
   end

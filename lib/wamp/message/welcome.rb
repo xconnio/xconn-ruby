@@ -6,6 +6,8 @@ module Wamp
   module Message
     # welcome message
     class Welcome
+      attr_reader :session_id, :details
+
       def initialize(session_id, details = {})
         @session_id = Validate.int!("Session Id", session_id)
         @details = Validate.hash!("Details", details)

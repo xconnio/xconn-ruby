@@ -76,12 +76,12 @@ module Wamp
 
       def coder
         @coder ||= case serializer
-                   when :json then Wamp::Serializer::JSON
-                   when :msgpack then Wamp::Serializer::MessagePack
-                   when :cbor then Wamp::Serializer::Cbor
-                   else
-                     raise "Unsupported protocol #{websocket.protocol}"
-                   end
+        when :json then Wamp::Serializer::JSON
+        when :msgpack then Wamp::Serializer::MessagePack
+        when :cbor then Wamp::Serializer::Cbor
+        else
+          raise "Unsupported protocol #{websocket.protocol}"
+        end
       end
     end
   end

@@ -4,6 +4,7 @@ require_relative "event/hello"
 require_relative "event/welcome"
 require_relative "event/abort"
 require_relative "event/challenge"
+require_relative "event/authenticate"
 require_relative "event/goodbye"
 
 require_relative "event/error"
@@ -26,6 +27,7 @@ require_relative "event/unregister"
 require_relative "event/unregistered"
 
 require_relative "event/invocation"
+require_relative "event/yield"
 
 module Wamp
   module Manager

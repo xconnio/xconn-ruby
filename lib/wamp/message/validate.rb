@@ -18,7 +18,7 @@ module Wamp
         end
 
         def hash!(name, value)
-          return value if value.is_a?(Hash)
+          return value.transform_keys(&:to_sym) if value.is_a?(Hash)
 
           raise ArgumentError, "The #{name} argument should be a dictionary."
         end
