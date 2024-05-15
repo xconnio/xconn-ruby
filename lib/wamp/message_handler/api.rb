@@ -8,17 +8,11 @@ module Wamp
     class Api
       extend Forwardable
 
-      attr_reader :connection, :session_id
+      attr_reader :connection, :session_id, :id_gen
 
       def initialize(connection)
         @connection = connection
-      end
-
-      def send_protocol_violation(text, *args, **kwargs)
-        message = Message::Abort.new({ message: text }, "wamp.error.protocol_violation", *args, **kwargs)
-        manager = Manager::Event::Abort.new(message, self)
-        connection.transmit(message.payload)
-        manager.emit_event(message)
+        @id_gen = Wampproto::IdGenerator.new
       end
 
       def subscribe(topic, handler, options = {}, &block)
@@ -63,25 +57,10 @@ module Wamp
         action.send_message(&block)
       end
 
-      def on_message(message)
-        manager = Manager::Event.resolve(message, self)
-        manager.emit_event(message)
-      end
-
-      def create_request_id
-        next_request_id
-      end
-
       private
 
       def next_request_id
-        @next_request_id = create_request_id_generator unless defined?(@next_request_id)
-        @next_request_id.call
-      end
-
-      def create_request_id_generator
-        request_id = 0
-        -> { request_id += 1 }
+        id_gen.next
       end
     end
   end

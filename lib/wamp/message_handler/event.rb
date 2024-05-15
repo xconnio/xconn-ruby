@@ -5,6 +5,8 @@ module Wamp
     # publish event to subscriber
     class Event < Base
       def handle
+        validate_received_message
+
         store[alt_store_key].fetch(:handler).call(message)
       end
 

@@ -5,6 +5,7 @@ module Wamp
     # Call
     class Invocation < Base
       def handle
+        connection.session.receive_message(message)
         data = store.fetch(alt_store_key)
 
         send_yield_message data.fetch(:handler)

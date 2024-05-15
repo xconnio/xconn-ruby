@@ -5,6 +5,8 @@ module Wamp
     # Published confirmation message
     class Published < Base
       def handle
+        validate_received_message
+
         deliver_response
       end
     end

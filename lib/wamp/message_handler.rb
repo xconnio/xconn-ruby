@@ -2,6 +2,11 @@
 
 require_relative "message_handler/base"
 
+require_relative "message_handler/hello"
+require_relative "message_handler/welcome"
+require_relative "message_handler/challenge"
+require_relative "message_handler/goodbye"
+
 require_relative "message_handler/subscribe"
 require_relative "message_handler/subscribed"
 require_relative "message_handler/unsubscribe"
@@ -32,9 +37,9 @@ module Wamp
     # instantiate correct handler
     module ClassMethods
       def resolve(data, connection)
-        return handle_when_not_joined(data, connection) unless connection.joiner.joined?
+        # return handle_when_not_joined(data, connection) unless connection.joiner.joined?
 
-        message = connection.session.receive(data)
+        message = connection.joiner.serializer.deserialize(data)
         klass_name = demodulize(message.class.name)
         klass = constantize("Wamp::MessageHandler::#{klass_name}")
         klass.new(message, connection)

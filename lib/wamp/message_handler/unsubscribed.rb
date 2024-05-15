@@ -5,6 +5,7 @@ module Wamp
     # Receive unsubscribed
     class Unsubscribed < Base
       def handle
+        validate_received_message
         delete_topic store.delete(alt_store_key)
 
         deliver_response

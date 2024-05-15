@@ -5,6 +5,8 @@ module Wamp
     # Registered callback
     class Registered < Base
       def handle
+        validate_received_message
+
         store[alt_store_key] = { handler: stored_data.fetch(:handler), procedure: stored_data.fetch(:procedure) }
         store_procedure
 

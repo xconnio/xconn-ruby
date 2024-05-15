@@ -5,11 +5,9 @@ module Wamp
     # Publish message
     class Publish < Base
       def send_message(&callback)
+        store[store_key] = { callback: callback } if message.options[:acknowledge]
+
         send_serialized message
-
-        return unless message.options[:acknowledge]
-
-        store[store_key] = { callback: callback }
       end
     end
   end

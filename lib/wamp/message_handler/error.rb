@@ -5,7 +5,9 @@ module Wamp
     # Call handler with error message
     class Error < Base
       def handle
-        stored_data[:handler].call(message)
+        validate_received_message
+
+        stored_data[:callback].call(message)
       end
     end
   end

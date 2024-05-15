@@ -5,6 +5,8 @@ module Wamp
     # Receive subscribed
     class Subscribed < Base
       def handle
+        validate_received_message
+
         store[alt_store_key] = { handler: stored_data.fetch(:handler), topic: stored_data.fetch(:topic) }
         store_topic
 

@@ -5,6 +5,8 @@ module Wamp
     # callback for unregister message
     class Unregistered < Base
       def handle
+        validate_received_message
+
         delete_procedure store.delete(alt_store_key)
 
         deliver_response

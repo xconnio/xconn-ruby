@@ -14,6 +14,16 @@ module Wamp
         @connection = connection
       end
 
+      def handle
+        raise NotImplementedError
+      end
+
+      def send_message
+        raise NotImplementedError
+      end
+
+      private
+
       def stored_data
         @stored_data ||= store.delete(store_key) || {}
       end
@@ -30,19 +40,15 @@ module Wamp
         message.request_id
       end
 
-      def handle
-        raise NotImplementedError
-      end
-
-      def send_message
-        raise NotImplementedError
-      end
-
       def deliver_response
         callback = stored_data.fetch(:callback, proc {})
         return unless callback
 
         callback.call(message)
+      end
+
+      def validate_received_message
+        connection.session.receive_message(message)
       end
 
       def send_serialized(message)
