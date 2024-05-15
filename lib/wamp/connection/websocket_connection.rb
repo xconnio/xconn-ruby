@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "wampproto"
+require_relative "websocket_client"
 
 # extending the class
 class Wampproto::Joiner # rubocop:disable Style/ClassAndModuleChildren

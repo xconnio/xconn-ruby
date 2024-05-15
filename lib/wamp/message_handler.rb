@@ -25,7 +25,6 @@ require_relative "message_handler/unregister"
 require_relative "message_handler/unregistered"
 
 require_relative "message_handler/invocation"
-require_relative "message_handler/yield"
 
 require_relative "message_handler/error"
 
