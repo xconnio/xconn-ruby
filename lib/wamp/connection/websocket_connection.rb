@@ -12,17 +12,14 @@ end
 module Wamp
   module Connection
     # Conn
-    class WebSocketConnection
-      attr_reader :url, :joiner, :session, :call_requests, :store, :websocket, :api
-      attr_accessor :executor
+    class WebSocketConnection < Session
+      attr_reader :url, :websocket
 
       def initialize(url = "ws://localhost:8080/ws", joiner = Wampproto::Joiner.new("realm1"))
+        super(joiner)
         @url        = url
-        @joiner     = joiner
-        @websocket = Wamp::Connection::WebsocketClient.new(self, protocols)
-        @session = Wampproto::Session.new(joiner.serializer)
-        @api = MessageHandler::Api.new(self)
-        @store = {}
+        @store      = {}
+        @websocket  = Wamp::Connection::WebsocketClient.new(self, protocols)
       end
 
       def run
@@ -32,19 +29,8 @@ module Wamp
         websocket.close
       end
 
-      def on_join(&block)
-        puts "blocking is saving"
-        self.executor = block
-      end
-
       def on_open
-        data = joiner.send_hello
-        transmit  data
-      end
-
-      def on_message(data)
-        handler = MessageHandler.resolve(data, self)
-        handler.handle
+        transmit joiner.send_hello
       end
 
       def transmit(data)
