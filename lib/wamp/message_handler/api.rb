@@ -24,7 +24,7 @@ module Wamp
       def unsubscribe(subscription_id, &block)
         subscription_id = connection.store[subscription_id] if connection.store.include?(subscription_id)
 
-        message = Wampproto::Message::Unsubscribe.new(next_request_id, subscription_id)
+        message = Wampproto::Message::Unsubscribe.new(next_request_id, subscription_id.to_i)
         action = MessageHandler::Unsubscribe.new(message, connection)
         action.send_message(&block)
       end
@@ -52,7 +52,7 @@ module Wamp
       def unregister(registration_id, &block)
         registration_id = connection.store[registration_id] if connection.store.include?(registration_id)
 
-        message = Wampproto::Message::Unregister.new(next_request_id, registration_id)
+        message = Wampproto::Message::Unregister.new(next_request_id, registration_id.to_i)
         action = MessageHandler::Unregister.new(message, connection)
         action.send_message(&block)
       end
