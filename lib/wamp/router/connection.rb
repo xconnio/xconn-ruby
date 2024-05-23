@@ -2,13 +2,6 @@
 
 require "websocket/driver"
 
-# extending the class
-class Wampproto::Acceptor # rubocop:disable Style/ClassAndModuleChildren
-  def accepted?
-    state == STATE_WELCOME_SENT
-  end
-end
-
 # Testing
 class Authenticator
   def self.authenticate(request)

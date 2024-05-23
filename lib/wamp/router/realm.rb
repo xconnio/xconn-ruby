@@ -30,10 +30,11 @@ module Wamp
 
       def attach_client(client)
         session_id = client.session_id
+        session_details = client.acceptor.session_details
 
         clients[session_id] = client
-        broker.add_session(session_id)
-        dealer.add_session(session_id)
+        broker.add_session(session_details)
+        dealer.add_session(session_details)
       end
 
       def detach_client(client)

@@ -3,13 +3,6 @@
 require "wampproto"
 require_relative "websocket_client"
 
-# extending the class
-class Wampproto::Joiner # rubocop:disable Style/ClassAndModuleChildren
-  def joined?
-    state == STATE_JOINED
-  end
-end
-
 module Wamp
   module Connection
     # Conn
@@ -19,14 +12,13 @@ module Wamp
       def initialize(url = "ws://localhost:8080/ws", joiner = Wampproto::Joiner.new("realm1"))
         super(joiner)
         @url        = url
-        @store      = {}
         @websocket  = Wamp::Connection::WebsocketClient.new(self, protocols)
       end
 
       def run
         websocket.run
       ensure
-        p "Close"
+        p %i[run close]
         websocket.close
       end
 
