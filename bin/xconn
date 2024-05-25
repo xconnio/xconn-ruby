@@ -1,0 +1,58 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "wamp"
+
+require "optparse"
+
+options = { host: "127.0.0.1", port: 8080, realm: "realm1", directory: "." }
+OptionParser.new do |opts|
+  opts.banner = "Usage: xconn [options]"
+
+  opts.on("-hHOST", "--host HOST", "WebSocket host (default: ws://127.0.0.1:8080/ws)") do |host|
+    options[:host] = host
+  end
+
+  opts.on("-rREALM", "--realm REALM", "Realm (default: reaml1)") do |realm|
+    options[:realm] = realm
+  end
+
+  opts.on("-pPORT", "--port PORT", "Port (default: 8080)") do |port|
+    options[:port] = port
+  end
+
+  opts.on("-dDIRECTORY", "--directory Directory", 'Directory (default: ".")') do |directory|
+    options[:directory] = directory
+  end
+
+  opts.on("-aAPP", "--app App", 'App (default: "App")') do |app|
+    options[:app] = app
+  end
+end.parse!
+
+def create_client_session(router)
+  session = Wamp::Connection::Session.new
+
+  server_session = Wamp::Router::Client.new
+  server_session.router = router
+  server_session.connection = session
+
+  session.stream = server_session
+  session
+end
+
+router = Wamp::Router::Base.new
+router.add_realm(options.fetch(:realm))
+
+client = create_client_session(router).tap(&:on_open)
+Pathname.new(options[:directory]).glob("**/*.rb").each { |file| require file.to_s }
+app = Object.const_get(options[:app])
+app.new.procedures.each do |procedure, func|
+  client.api.register(procedure, func) do
+    puts "Registered procedure: #{procedure}"
+  end
+end
+
+server = Wamp::Router::Server.new(router, options)
+server.run

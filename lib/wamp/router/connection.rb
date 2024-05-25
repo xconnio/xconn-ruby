@@ -12,7 +12,7 @@ end
 module Wamp
   module Router
     # TOP Level Doc
-    class Connection < Client
+    class Connection < Client # rubocop:disable Metrics/ClassLength
       include WebSocket::Driver::EventEmitter
       CONNECTING = 0
       OPEN       = 1
@@ -61,18 +61,28 @@ module Wamp
         socket.close
       end
 
-      def listen(&block)
+      def listen(&block) # rubocop:disable Metrics/MethodLength
         return unless [CONNECTING, OPEN].include?(@ready_state)
 
-        data = socket.read_nonblock(4096, exception: false)
-        case data
-        when :wait_readable
-          # do nothing
-        when nil
-          block&.call
-          @driver.close
-        else
-          receive_data(data)
+        begin
+          data = socket.read_nonblock(4096, exception: false)
+          case data
+          when :wait_readable
+            # do nothing
+          when nil
+            block&.call
+            @driver.close
+          else
+            receive_data(data)
+          end
+        rescue StandardError
+          begin
+            block&.call
+            @driver.close
+          rescue StandardError
+            # Errno::ECONNRESET
+            puts "Failed to handle: Errno::ECONNRESET"
+          end
         end
       end
 
@@ -118,14 +128,6 @@ module Wamp
 
       def close(_code, _reason)
         @driver.close
-      end
-
-      def encode(wamp_message)
-        coder.encode wamp_message
-      end
-
-      def decode(websocket_message)
-        coder.decode websocket_message
       end
 
       attr_reader :serializer
