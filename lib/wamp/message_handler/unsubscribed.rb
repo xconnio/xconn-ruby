@@ -8,7 +8,11 @@ module Wamp
         validate_received_message
         delete_topic store.delete(alt_store_key)
 
-        deliver_response
+        deliver_response(response)
+      end
+
+      def response
+        Type::Success.new
       end
 
       private

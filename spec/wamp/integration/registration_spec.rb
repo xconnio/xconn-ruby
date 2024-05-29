@@ -27,7 +27,7 @@ RSpec.describe "registrations" do
       expect do
         client.api.register(procedure, handler) do |response|
           counter += 1
-          expect(response).to be_an_instance_of(Wampproto::Message::Registered)
+          expect(response).to be_an_instance_of(Wamp::Type::Registration)
         end
       end.to change { counter }.by(1)
     end
@@ -43,7 +43,7 @@ RSpec.describe "registrations" do
         expect do
           client2.api.call(procedure) do |response|
             counter += 1
-            expect(response).to be_an_instance_of(Wampproto::Message::Result)
+            expect(response).to be_an_instance_of(Wamp::Type::Result)
           end
         end.to change { counter }.by(1)
       end
@@ -58,7 +58,7 @@ RSpec.describe "registrations" do
         expect do
           client.api.unregister(procedure) do |response|
             counter += 1
-            expect(response).to be_an_instance_of(Wampproto::Message::Unregistered)
+            expect(response).to be_an_instance_of(Wamp::Type::Success)
           end
         end.to change { counter }.by(1)
       end
@@ -71,7 +71,7 @@ RSpec.describe "registrations" do
         expect do
           client.api.unregister(procedure) do |response|
             counter += 1
-            expect(response).to be_an_instance_of(Wampproto::Message::Error)
+            expect(response).to be_an_instance_of(Wamp::Type::Error)
           end
         end.to change { counter }.by(1)
       end

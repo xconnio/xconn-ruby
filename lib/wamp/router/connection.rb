@@ -75,7 +75,9 @@ module Wamp
           else
             receive_data(data)
           end
-        rescue StandardError
+        rescue StandardError => e
+          puts e.message
+          puts e.backtrace
           begin
             block&.call
             @driver.close

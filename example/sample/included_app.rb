@@ -7,6 +7,6 @@ class IncludedApp < Wamp::App
   register echo: "foo.bar.echo"
 
   def echo(invocation)
-    Wampproto::Message::Yield.new(invocation.request_id, {}, "INCLUDED", name: "Ismail")
+    Wamp::Type::Result.new(args: invocation.args, kwargs: invocation.kwargs, details: invocation.details)
   end
 end

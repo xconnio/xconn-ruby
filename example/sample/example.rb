@@ -6,18 +6,18 @@ require_relative "included_app"
 
 # SystemApp
 class Example < Wamp::App
-  register what: "io.xconn.echo", current_date: "io.xconn.date.get"
+  register echo: "io.xconn.echo", current_date: "io.xconn.date.get"
 
   def initialize
     super
     include_app(IncludedApp.new, "test.")
   end
 
-  def what(invocation)
-    Wampproto::Message::Yield.new(invocation.request_id, {}, *invocation.args, **invocation.kwargs)
+  def echo(invocation)
+    Wamp::Type::Result.new(args: invocation.args, kwargs: invocation.kwargs, details: invocation.details)
   end
 
-  def current_date(invocation)
-    Wampproto::Message::Yield.new(invocation.request_id, {}, Date.today.iso8601)
+  def current_date(_invocation)
+    Wamp::Type::Result.new(args: Date.today.iso8601)
   end
 end

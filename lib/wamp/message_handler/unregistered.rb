@@ -9,7 +9,11 @@ module Wamp
 
         delete_procedure store.delete(alt_store_key)
 
-        deliver_response
+        deliver_response(response)
+      end
+
+      def response
+        Type::Success.new
       end
 
       def alt_store_key
