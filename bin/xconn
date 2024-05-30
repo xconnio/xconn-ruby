@@ -6,7 +6,7 @@ require "wamp"
 
 require "optparse"
 
-options = { host: "127.0.0.1", port: 8080, realm: "realm1", directory: "." }
+options = { host: "127.0.0.1", port: 8080, realm: "realm1", directory: ".", app: "App" }
 OptionParser.new do |opts|
   opts.banner = "Usage: xconn [options]"
 
@@ -22,14 +22,23 @@ OptionParser.new do |opts|
     options[:port] = port
   end
 
-  opts.on("-dDIRECTORY", "--directory Directory", 'Directory (default: ".")') do |directory|
+  opts.on("-dDIRECTORY", "--directory DIRECTORY", 'Directory (default: ".")') do |directory|
     options[:directory] = directory
   end
 
-  opts.on("-aAPP", "--app App", 'App (default: "App")') do |app|
+  opts.on("-aAPP", "--app APP", 'App (default: "App")') do |app|
     options[:app] = app
   end
+
+  opts.on("-v", "--version", "Gem Version") do |version|
+    options[:version] = version
+  end
 end.parse!
+
+if options.include?(:version)
+  puts "Xconn v#{Wamp::VERSION}"
+  exit 0
+end
 
 def create_client_session(router)
   session = Wamp::Connection::Session.new
@@ -46,12 +55,24 @@ router = Wamp::Router::Base.new
 router.add_realm(options.fetch(:realm))
 
 client = create_client_session(router).tap(&:on_open)
-Pathname.new(options[:directory]).glob("**/*.rb").each { |file| require file.to_s }
-app = Object.const_get(options[:app])
-app.new.procedures.each do |procedure, func|
-  client.api.register(procedure, func) do
-    puts "Registered procedure: #{procedure}"
+
+begin
+  Pathname.new(options[:directory]).glob("**/*.rb").each { |file| require file.to_s }
+rescue LoadError => e
+  puts e.message
+  exit 1
+end
+
+begin
+  app = Object.const_get(options[:app])
+  app.new.procedures.each do |procedure, func|
+    client.api.register(procedure, func) do
+      puts "Registered procedure: #{procedure}"
+    end
   end
+rescue StandardError => e
+  puts e.message
+  exit 1
 end
 
 server = Wamp::Router::Server.new(router, options)
