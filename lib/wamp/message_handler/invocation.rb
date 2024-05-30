@@ -15,12 +15,19 @@ module Wamp
         "registration_#{message.registration_id}"
       end
 
+      def invocation_response
+        Type::Invocation.new(args: message.args, kwargs: message.kwargs, details: message.details)
+      end
+
       private
 
       def send_yield_message(handler)
-        result = handler.call(message)
-        yield_message = result if result.instance_of?(Wampproto::Message::Yield)
-        yield_message ||= Wampproto::Message::Yield.new(message.request_id, {}, result)
+        result = handler.call(invocation_response)
+        yield_message = if result.instance_of?(Type::Result)
+          Wampproto::Message::Yield.new(message.request_id, result.details, *result.args, **result.kwargs)
+        else
+          Wampproto::Message::Yield.new(message.request_id, {}, result)
+        end
         send_serialized yield_message
       end
     end

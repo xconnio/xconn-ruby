@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
   end
   spec.bindir = "bin"
   spec.executables = spec.files.grep(%r{\Abin/}) { |f| File.basename(f) }
+  spec.executables << "xconn"
   spec.require_paths = ["lib"]
 
   spec.add_dependency "cbor", "~> 0.5.9.8"

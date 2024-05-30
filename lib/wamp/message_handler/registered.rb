@@ -10,7 +10,11 @@ module Wamp
         store[alt_store_key] = { handler: stored_data.fetch(:handler), procedure: stored_data.fetch(:procedure) }
         store_procedure
 
-        deliver_response
+        deliver_response(response)
+      end
+
+      def response
+        Type::Registration.new(registration_id: message.registration_id)
       end
 
       def alt_store_key

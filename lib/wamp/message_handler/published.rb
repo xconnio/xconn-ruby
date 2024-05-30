@@ -7,7 +7,11 @@ module Wamp
       def handle
         validate_received_message
 
-        deliver_response
+        deliver_response(response)
+      end
+
+      def response
+        Type::Publication.new(publication_id: message.publication_id)
       end
     end
   end

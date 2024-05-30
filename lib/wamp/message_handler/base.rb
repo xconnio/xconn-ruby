@@ -40,9 +40,11 @@ module Wamp
         message.request_id
       end
 
-      def deliver_response
+      def deliver_response(response)
         callback = stored_data.fetch(:callback, proc {})
         return unless callback
+
+        return callback.call(response) unless response.nil?
 
         callback.call(message)
       end

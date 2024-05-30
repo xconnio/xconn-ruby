@@ -94,13 +94,13 @@ RSpec.describe Wamp::MessageHandler::Api do
       connection.on_join do |api|
         handler = proc { |msg| msg }
         api.register(procedure, handler) do |response|
-          expect(response).to be_an_instance_of(Wampproto::Message::Registered)
+          expect(response).to be_an_instance_of(Wamp::Type::Registration)
         end
         received_registered
         expect(connection.store).to include("registration_#{registration_id}")
 
         api.unregister(procedure) do |response|
-          expect(response).to be_an_instance_of(Wampproto::Message::Unregistered)
+          expect(response).to be_an_instance_of(Wamp::Type::Success)
         end
         received_unregistered
         expect(connection.store).not_to include("registration_#{registration_id}")
@@ -112,10 +112,10 @@ RSpec.describe Wamp::MessageHandler::Api do
 
     it "registers and receives invocation" do
       connection.on_join do |api|
-        handler = proc { |msg| expect(msg).to be_an_instance_of(Wampproto::Message::Invocation) }
+        handler = proc { |msg| expect(msg).to be_an_instance_of(Wamp::Type::Invocation) }
 
         api.register(procedure, handler) do |response|
-          expect(response).to be_an_instance_of(Wampproto::Message::Registered)
+          expect(response).to be_an_instance_of(Wamp::Type::Registration)
         end
         received_registered
         expect(connection.store).to include("registration_#{registration_id}")
@@ -142,7 +142,7 @@ RSpec.describe Wamp::MessageHandler::Api do
         counter = 1
         api.call(procedure, {}, 2) do |response|
           counter += 1
-          expect(response).to be_an_instance_of(Wampproto::Message::Result)
+          expect(response).to be_an_instance_of(Wamp::Type::Result)
         end
 
         expect(connection.store).to include("request_#{request_id}")

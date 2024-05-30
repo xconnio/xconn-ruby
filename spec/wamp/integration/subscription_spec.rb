@@ -27,7 +27,7 @@ RSpec.describe "subscriptions" do
       expect do
         client.api.subscribe(topic, handler) do |response|
           subscription_counter += 1
-          expect(response).to be_an_instance_of(Wampproto::Message::Subscribed)
+          expect(response).to be_an_instance_of(Wamp::Type::Subscription)
         end
       end.to change { subscription_counter }.by(1)
     end
@@ -47,7 +47,7 @@ RSpec.describe "subscriptions" do
         expect do
           client2.api.publish(topic) do |response|
             counter += 1
-            expect(response).to be_instance_of(Wampproto::Message::Published)
+            expect(response).to be_instance_of(Wamp::Type::Publication)
           end
         end.to change { counter }.by(1)
       end
@@ -61,7 +61,7 @@ RSpec.describe "subscriptions" do
         expect do
           client.api.unsubscribe(topic) do |response|
             counter += 1
-            expect(response).to be_an_instance_of(Wampproto::Message::Unsubscribed)
+            expect(response).to be_an_instance_of(Wamp::Type::Success)
           end
         end.to change { counter }.by(1)
       end
@@ -72,7 +72,7 @@ RSpec.describe "subscriptions" do
           expect do
             client.api.unsubscribe(129_876) do |response|
               counter += 1
-              expect(response).to be_an_instance_of(Wampproto::Message::Error)
+              expect(response).to be_an_instance_of(Wamp::Type::Error)
             end
           end.to change { counter }.by(1)
         end

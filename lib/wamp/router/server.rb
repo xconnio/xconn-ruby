@@ -9,18 +9,20 @@ module Wamp
   module Router
     # Connection Handler
     class Server
-      attr_reader :selector
+      attr_reader :selector, :options
 
-      def initialize
+      def initialize(router, options = {})
+        @options = options
         @selector = NIO::Selector.new
-        @router = Wamp::Router::Base.new
-        @router.add_realm("realm1")
+        @router = router
+        # @router.add_realm(options.fetch(:realm, "realm1"))
       end
 
       def run
         trap("INT") { throw :ctrl_c }
 
         create_tcp_server
+        options_message
         catch :ctrl_c do
           loop do
             accept_connection
@@ -28,8 +30,15 @@ module Wamp
         end
       end
 
+      def options_message
+        host = options.fetch(:host, "127.0.0.1")
+        port = options.fetch(:port, 8080)
+        realm = options.fetch(:realm, "realm1")
+        puts "Starting router on ws://#{host}:#{port}/ws and added Realm: #{realm}"
+      end
+
       def create_tcp_server
-        server = TCPServer.new("127.0.0.1", 8080)
+        server = TCPServer.new(options.fetch(:host, "127.0.0.1"), options.fetch(:port, 8080))
         selector.register(server, :r)
       end
 

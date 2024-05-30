@@ -10,7 +10,11 @@ module Wamp
         store[alt_store_key] = { handler: stored_data.fetch(:handler), topic: stored_data.fetch(:topic) }
         store_topic
 
-        deliver_response
+        deliver_response(response)
+      end
+
+      def response
+        Type::Subscription.new(subscription_id: message.subscription_id)
       end
 
       def alt_store_key
