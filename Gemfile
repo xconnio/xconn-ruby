@@ -12,6 +12,4 @@ gem "rubocop", "~> 1.21"
 
 gem "async", "~> 2.9"
 
-gem "wampproto", "~> 0.1.1", require: true
-
 gem "debug", "~> 1.9", groups: %i[development test]
