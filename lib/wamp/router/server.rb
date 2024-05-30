@@ -13,6 +13,8 @@ module Wamp
 
       def initialize
         @selector = NIO::Selector.new
+        @router = Wamp::Router::Base.new
+        @router.add_realm("realm1")
       end
 
       def run
@@ -44,10 +46,11 @@ module Wamp
 
       def create_connection(client)
         monitor = selector.register(client, :r)
-        connection = Connection.new(client) do |session|
+        connection = Connection.new(client) do |conn|
           selector.deregister(monitor)
-          Registrations.clean_registrations(session)
+          @router.detach_client(conn)
         end
+        connection.router = @router
         monitor.value = proc do
           connection.listen
         end

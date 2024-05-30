@@ -11,3 +11,5 @@ gem "rspec", "~> 3.0"
 gem "rubocop", "~> 1.21"
 
 gem "async", "~> 2.9"
+
+gem "wampproto", github: "xconnio/wampproto.rb", branch: :main, require: true

@@ -2,17 +2,31 @@
 
 require "websocket/driver"
 
+# extending the class
+class Wampproto::Acceptor # rubocop:disable Style/ClassAndModuleChildren
+  def accepted?
+    state == STATE_WELCOME_SENT
+  end
+end
+
+# Testing
+class Authenticator
+  def self.authenticate(request)
+    Wampproto::Acceptor::Response.new(request.authid, "role")
+  end
+end
+
 module Wamp
   module Router
     # TOP Level Doc
-    class Connection
+    class Connection < Client
       include WebSocket::Driver::EventEmitter
       CONNECTING = 0
       OPEN       = 1
       CLOSING    = 2
       CLOSED     = 3
 
-      attr_reader :socket, :session
+      attr_reader :socket, :session, :acceptor
 
       def initialize(socket, &cleanup)
         super()
@@ -23,8 +37,17 @@ module Wamp
         @driver.on(:message) { on_message(_1.data) }
         @driver.on(:close) { |evt| begin_close(evt.reason, evt.code) }
         @driver.on(:connect) { on_connect }
-        @session = Wamp::Manager::Session.new(self)
-        @ready_state = OPEN
+        @ready_state = CONNECTING
+      end
+
+      def on_connect
+        @driver.start if WebSocket::Driver.websocket?(@driver.env)
+        choose_serializer_from @driver.env["HTTP_SEC_WEBSOCKET_PROTOCOL"]
+        @acceptor = Wampproto::Acceptor.new(serializer, Authenticator)
+      end
+
+      def connection
+        self
       end
 
       def begin_close(reason, code)
@@ -33,7 +56,7 @@ module Wamp
         @ready_state = CLOSING
         @close_params = [reason, code]
 
-        @cleanup&.call(session)
+        @cleanup&.call(self)
         finalize_close
       end
 
@@ -41,23 +64,19 @@ module Wamp
         return if @ready_state == CLOSED
 
         @ready_state = CLOSED
-        socket.close
         @driver.close
-      end
-
-      def on_connect
-        @driver.start if WebSocket::Driver.websocket?(@driver.env)
+        socket.close
       end
 
       def listen(&block)
-        return unless @ready_state == OPEN
+        return unless [CONNECTING, OPEN].include?(@ready_state)
 
         data = socket.read_nonblock(4096, exception: false)
         case data
         when :wait_readable
           # do nothing
         when nil
-          block.call
+          block&.call
           @driver.close
         else
           receive_data(data)
@@ -66,7 +85,7 @@ module Wamp
 
       # triggers on_message
       def receive_data(data)
-        return unless @ready_state == OPEN
+        return unless [OPEN, CONNECTING].include?(@ready_state)
 
         @driver.parse(data)
       end
@@ -77,7 +96,15 @@ module Wamp
       end
 
       def transmit(message)
-        @driver.text(encode(message))
+        # return false if @ready_state > OPEN
+
+        case message
+        when Wampproto::Message::Base then transmit(serializer.serialize(message))
+        when Numeric then @driver.text(message.to_s)
+        when String  then @driver.text(message)
+        when Array   then @driver.binary(message)
+        else false
+        end
       end
 
       private
@@ -86,12 +113,6 @@ module Wamp
         return unless @ready_state == CONNECTING
 
         @ready_state = OPEN
-      end
-
-      def on_message(data)
-        msg = Wamp::Message.resolve(coder.decode(data))
-        manager = Wamp::Manager::Event.resolve(msg, session)
-        manager.emit_event(msg)
       end
 
       def on_close(message)
@@ -114,8 +135,18 @@ module Wamp
         coder.decode websocket_message
       end
 
-      def coder
-        @coder ||= Wamp::Serializer::JSON
+      attr_reader :serializer
+
+      def choose_serializer_from(protocols)
+        @serializer = if protocols.include?("wamp.2.msgpack")
+          Wampproto::Serializer::Msgpack
+        elsif protocols.include?("wamp.2.cbor")
+          Wampproto::Serializer::Cbor
+        elsif protocols.include?("wamp.2.json")
+          Wampproto::Serializer::JSON
+        else
+          close
+        end
       end
     end
   end
