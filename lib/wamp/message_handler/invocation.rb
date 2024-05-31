@@ -16,7 +16,10 @@ module Wamp
       end
 
       def invocation_response
-        Type::Invocation.new(args: message.args, kwargs: message.kwargs, details: message.details)
+        Type::Invocation.new(args: message.args, kwargs: message.kwargs, details: message.details).tap do |invocation|
+          invocation.connection = connection
+          invocation.request_id = message.request_id
+        end
       end
 
       private

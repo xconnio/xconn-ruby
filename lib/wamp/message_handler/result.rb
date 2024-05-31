@@ -6,7 +6,11 @@ module Wamp
     class Result < Base
       def handle
         validate_received_message
-        stored_data.fetch(:handler).call(response)
+        if message.details[:progress]
+          store[store_key].fetch(:handler).call(response)
+        else
+          stored_data.fetch(:handler).call(response)
+        end
       end
 
       def response
