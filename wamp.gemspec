@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "ed25519", "~> 1.3"
   spec.add_dependency "msgpack", "~> 1.7.2"
   spec.add_dependency "nio4r", "~> 2.7"
-  spec.add_dependency "wampproto", "~> 0.1.1"
+  spec.add_dependency "wampproto", "~> 0.1.2"
   spec.add_dependency "websocket-driver", "~> 0.7"
   spec.metadata["rubygems_mfa_required"] = "true"
 end
