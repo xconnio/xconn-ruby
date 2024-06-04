@@ -18,14 +18,15 @@ module Wamp
       OPEN       = 1
       CLOSING    = 2
       CLOSED     = 3
+      SUPPORTED_PROTOCOLS = ["wamp.2.msgpack", "wamp.2.cbor", "wamp.2.json"].freeze
 
       attr_reader :socket, :session, :acceptor
 
-      def initialize(socket, &cleanup)
-        super()
+      def initialize(socket, &cleanup) # rubocop:disable Lint/MissingSuper
+        # super() # on_connect() does what super() does
         @cleanup = cleanup
         @socket = socket
-        @driver = WebSocket::Driver.server(self)
+        @driver = WebSocket::Driver.server(self, protocols: SUPPORTED_PROTOCOLS)
         @driver.on(:open) { on_open(_1) }
         @driver.on(:message) { on_message(_1.data) }
         @driver.on(:close) { |evt| begin_close(evt.reason, evt.code) }
@@ -57,7 +58,7 @@ module Wamp
         return if @ready_state == CLOSED
 
         @ready_state = CLOSED
-        @driver.close
+        @driver.close(*@close_params)
         socket.close
       end
 
@@ -128,21 +129,28 @@ module Wamp
         @driver.close(message.code, message.reason)
       end
 
-      def close(_code, _reason)
-        @driver.close
+      def close(code, reason)
+        @driver.close(reason, code)
       end
 
       attr_reader :serializer
 
-      def choose_serializer_from(protocols)
-        @serializer = if protocols.include?("wamp.2.msgpack")
+      def choose_serializer_from(protocols) # rubocop:disable Metrics/MethodLength
+        common_protocols = protocols.to_s.split(",") & SUPPORTED_PROTOCOLS
+        protocol = common_protocols[0].to_s
+
+        @serializer = if protocol.include?("wamp.2.msgpack")
           Wampproto::Serializer::Msgpack
         elsif protocols.include?("wamp.2.cbor")
           Wampproto::Serializer::Cbor
         elsif protocols.include?("wamp.2.json")
           Wampproto::Serializer::JSON
         else
-          close
+          reason = "on_connect: protocols not supported '#{protocols}'."
+          code = 1006
+          puts reason
+          @close_params = [reason, code]
+          finalize_close
         end
       end
     end
